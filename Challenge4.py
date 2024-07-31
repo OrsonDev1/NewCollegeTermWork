@@ -1,5 +1,7 @@
 import random
 import time
+import pickle as pkl
+
 
 # setting most values to zero, that need to be reset
 p1score = 0
@@ -14,8 +16,13 @@ extradice = False
 maxrounds = 5
 roundspassed = 0
 
-# will change this to load the array off a file later
-playerskeys = [["Steve", "Orson"], ["1", "1"]]
+
+# need to make a blank array
+playerskeys = []
+
+# reads the authentication names and keys off of the .pkl file, saves it in the array
+with open ('authentication.pkl', 'rb') as f:
+    playerskeys = pkl.load(f)
 
 # rolling two dice, easier to do through a subroutine, so you can call it again.
 def rolldosdice():

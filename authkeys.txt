@@ -1,0 +1,2 @@
+im gonna forget these so here:
+playerskeys = [["Steve", "Orson", "Matt", "Kurt"], ["B456", "A789", "C678", "E109"]]
