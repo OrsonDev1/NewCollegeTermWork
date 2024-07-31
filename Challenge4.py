@@ -19,6 +19,7 @@ maxRounds = 5
 roundsPassed = 0
 winningScore = 0
 scores = []
+endScoring = 0
 
 # reads the authentication names and keys off of the .pkl file, saves it in the array
 with open('authentication.pkl', 'rb') as f:
@@ -67,6 +68,14 @@ def authenticationCheck():
         print("Player 2 failed name check")
         exit(1)
 
+def authenticationDoubleCheck():
+    # double-checking there are no unauthenticated players
+    global p1authPass
+    global p2authPass
+    if p1authPass == 0 or p2authPass == 0:
+        print("Either player has failed authentication check, please try again")
+        exit(1)
+
 def scoreboardSystem():
     # Load the old scoreboard
     with open('scoreboard.json', 'r') as scoreFile:
@@ -83,11 +92,32 @@ def scoreboardSystem():
     with open('scoreboard.json', 'w') as scoreFile:
         json.dump(top_scores, scoreFile, indent=4)
 
-    print("Current top scores:")
-    for score in scores:
-        print(f"{score['name']}: {score['score']}")
     return top_scores
 
+def maingame():
+    global endScoring
+    global extraDice
+    rollDosDice()
+    total = dice1 + dice2
+    endScoring = total
+    # working out the extra scores
+    if dice1 == dice2:
+        # if double, roll a third dice
+        singleDice()
+        endScoring = endScoring + dice3
+        extraDice = True
+    # if even, + 10
+    if total % 2 == 0:
+        endScoring = endScoring + 10
+        print("Even Total! Your score was increased by 10!")
+    # if odd, -5
+    elif total % 2 != 0:
+        endScoring = endScoring - 5
+        print("Odd Total, Your score was decreased by 5 :(")
+    # just incase
+    else:
+        print("Unexpected error, please try again")
+        exit(1)
 
 # inputting the player data, chose to use authentication keys to authenticate the players
 p1name = input("Player One Name: ")
@@ -97,11 +127,7 @@ p2name = input("Player Two Name: ")
 p2name = p2name.title()
 p2authKey = input("Player Two Authentication Key ")
 authenticationCheck()
-
-# double-checking there are no unauthenticated players
-if p1authPass == 0 or p2authPass == 0:
-    print("Either player has failed authentication check, please try again")
-    exit(1)
+authenticationDoubleCheck()
 print("-----------------------------------------")
 time.sleep(1)
 # will run many times till 5 rounds have passed
@@ -109,28 +135,9 @@ while roundsPassed < maxRounds:
     # rolling the two dice
     print("Round: ", roundsPassed+1)
     print("--------")
-    rollDosDice()
-    total = dice1 + dice2
-    p1score = total + p1score
     print("Player 1 roll")
-    # working out the extra scores
-    if dice1 == dice2:
-        # if double, roll a third dice
-        singleDice()
-        p1score = p1score + dice3
-        extraDice = True
-    # if even, + 10
-    if total % 2 == 0:
-        p1score = p1score + 10
-        print("Even Total! Your score was increased by 10!")
-    # if odd, -5
-    elif total % 2 != 0:
-        p1score = p1score - 5
-        print("Odd Total, Your score was decreased by 5 :(")
-    # just incase
-    else:
-        print("Unexpected error, please try again")
-        exit(1)
+    maingame()
+    p1score = p1score + endScoring
     # print out scores and dice rolls
     if extraDice:
         print("Player 1 rolled", dice1, ",", dice2, "and", dice3, "and has a total score of", p1score)
@@ -140,31 +147,11 @@ while roundsPassed < maxRounds:
     # make it seem more human, and easier to read
     print("-----------")
     time.sleep(2)
-
+    endScoring = 0
+    print("Player 2 roll")
+    maingame()
+    p2score = p2score + endScoring
     # do it all again for player 2
-    rollDosDice()
-    total = dice1 + dice2
-    p2score = total + p2score
-    print("Player 2 Roll")
-    # working out the extra scores
-    if dice1 == dice2:
-        # if double, roll a third dice
-        singleDice()
-        p2score = p2score + dice3
-        extraDice = True
-    # if even, + 10
-    if total % 2 == 0:
-        p2score = p2score + 10
-        print("Even Total! Your score was increase by 10!")
-    # if odd, -5
-    elif total % 2 != 0:
-        p2score = p2score - 5
-        print("Odd Total, Your score was decrease by 5 :(")
-    # just incase
-    else:
-        print("Unexpected error, please try again")
-        exit(1)
-    # print out scores and dice rolls
     if extraDice:
         print("Player 2 rolled", dice1, ",", dice2, "and", dice3, "and has a total score of", p2score)
         extraDice = False
@@ -198,11 +185,11 @@ print("Final Score for Player 1: ", p1score)
 print("Final Score for Player 2: ", p2score)
 
 if p1score > p2score:
-    print("Player 1 has won with a score of", p1score)
+    print("Player 1",p1name ,"has won with a score of", p1score)
     winningScore = p1score
     winningName = p1name
 elif p2score > p1score:
-    print("Player 2 has won with a score of", p2score)
+    print("Player 2",p2name ,"has won with a score of", p2score)
     winningScore = p2score
     winningName = p2name
 else:
@@ -210,3 +197,7 @@ else:
     exit(1)
 
 scoreboardSystem()
+with open('scoreboard.json', 'r') as scoreFile:
+    scores = json.load(scoreFile)
+for score in scores:
+    print(f"{score['name']}: {score['score']}")
