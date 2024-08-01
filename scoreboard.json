@@ -4,6 +4,10 @@
         "score": 92
     },
     {
+        "name": "Steve",
+        "score": 87
+    },
+    {
         "name": "Matt",
         "score": 79
     },
@@ -14,9 +18,5 @@
     {
         "name": "Matt",
         "score": 72
-    },
-    {
-        "name": "Orson",
-        "score": 71
     }
 ]
